@@ -1,7 +1,7 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
-
-FROM jupyter/base-notebook
+ARG BASE_CONTAINER=jupyter/base-notebook
+FROM $BASE_CONTAINER
 
 LABEL maintainer="Jupyter Project <jupyter@googlegroups.com>"
 
@@ -10,7 +10,8 @@ USER root
 # Install all OS dependencies for fully functional notebook server
 RUN apt-get update && apt-get install -yq --no-install-recommends \
     build-essential \
-    emacs \
+    emacs-nox \
+    vim-tiny \
     git \
     inkscape \
     jed \
@@ -19,18 +20,19 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     libxrender1 \
     lmodern \
     netcat \
-    pandoc \
     python-dev \
-    texlive-fonts-extra \
-    texlive-fonts-recommended \
-    texlive-generic-recommended \
-    texlive-latex-base \
-    texlive-latex-extra \
+    # ---- nbconvert dependencies ----
     texlive-xetex \
+    texlive-fonts-recommended \
+    texlive-plain-generic \
+    # ----
+    tzdata \
     unzip \
-    vim \
-    && apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    nano-tiny \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Create alternative for nano -> nano-tiny
+RUN update-alternatives --install /usr/bin/nano nano /usr/bin/nano-tiny 10
 
 # Switch back to jovyan to avoid accidental container runs as root
 USER $NB_UID
